@@ -13,6 +13,10 @@ module.exports = {
             { 
                 test: /\.obj$/, 
                 loader: 'raw-loader' 
+            },
+            { 
+                test: /\.glsl$/, 
+                loader: 'raw-loader' 
             }
         ]
     },
