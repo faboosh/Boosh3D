@@ -33,21 +33,24 @@ export function rotate3D(point:Vec, rotation:Vec): Vec {
     const { sin, cos } = Math;
 
     const rotationZ:number[][] = [
-        [ cos(z), -sin(z), 0 ],
-        [ sin(z), cos(z),  0 ],
-        [ 0,      0,       1 ]
+        [ cos(z), -sin(z), 0, 0 ],
+        [ sin(z), cos(z),  0, 0 ],
+        [ 0,      0,       1, 0 ],
+        [ 0,      0,       0, 1 ],
     ]
 
     const rotationX:number[][] = [
-        [ 1,      0,       0 ],
-        [ 0, cos(x), -sin(x) ],
-        [ 0, sin(x), cos(x)  ],
+        [ 1,      0,       0, 0 ],
+        [ 0, cos(x), -sin(x), 0 ],
+        [ 0, sin(x),  cos(x), 0 ],
+        [ 0,      0,       0, 1 ],
     ]
 
     const rotationY:number[][] = [
-        [ cos(y), 0, -sin(y) ],
-        [ 0,      1,       0 ],
-        [ sin(y), 0, cos(y)  ],
+        [ cos(y), 0, -sin(y), 0 ],
+        [ 0,      1,       0, 0 ],
+        [ sin(y), 0,  cos(y), 0 ],
+        [ 0,      0,       0, 1 ],
     ]
 
     let rotated = matrixToVec(
@@ -76,11 +79,13 @@ export class Vec {
     x:number;
     y:number;
     z:number;
+    w:number;
 
     constructor(x?:number, y?:number, z?:number) {
         this.x = x || 0;
         this.y = y || 0;
         this.z = z || 0;
+        this.w = 1;
     }
 
     scale(factor:number) {
@@ -107,6 +112,10 @@ export function matrixToVec(m:number[][]): Vec {
 
     if(m.length > 2) {
         vec.z = m[2][0];
+        
+        if(m.length > 3) {
+            vec.w = m[3][0];
+        }
     }
 
     return vec;
@@ -117,6 +126,7 @@ export function vecToMatrix(vec:Vec): number[][] {
         [vec.x],
         [vec.y],
         [vec.z],
+        [vec.w],
     ];
 }
 
@@ -131,7 +141,49 @@ export function pointsToVec(points:number[]): Vec {
 
     if(points.length > 2) {
         vec.z = points[2];
+
+        if(points.length > 3) {
+            vec.w = points[3];
+        }
     }
 
     return vec;
+}
+
+export const Mat4 = {
+    create() : number[][] {
+        return [
+            [ 1,   0,    0,   0 ],
+            [ 0,   1,    0,   0 ],
+            [ 0,   0,    1,   0 ],
+            [ 0,   0,    0,   1 ],
+        ]
+    },
+
+    projection(near:number, far:number, fov:number, aspect:number) :number[][] {
+        const { tan } = Math;
+        return (
+            [
+                [ 1 / tan(fov / 2),   0,                        0,                        0 ],
+                [ 0,                  aspect / tan(fov / 2),    0,                        0 ],
+                [ 0,                  0,                        (near + far) / (near - far),  2 * near * far / (near - far) ],
+                [ 0,                  0,                       -1,                        0 ],
+            ]
+        )
+    },
+
+    serialize(mat4:number[][]) : number[] {
+        let serialized:number[] = [];
+        mat4.forEach((row:any) => {
+            row.forEach((val:any) => {
+                serialized.push(val);
+            })
+        })
+
+        return serialized;
+    }
+}
+
+export function angleToRadiant(angle: number) : number {
+    return (angle / 360) * (Math.PI * 2)
 }

@@ -17,6 +17,10 @@ module.exports = {
             { 
                 test: /\.glsl$/, 
                 loader: 'raw-loader' 
+            },
+            {
+                test: /\.mp3$/,
+                loader: 'file-loader'
             }
         ]
     },
