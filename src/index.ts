@@ -2,10 +2,11 @@ import Boosh3D from './boosh3D';
 import main from './scenes/main';
 import titlescreen from './scenes/titlescreen';
 
-const game = new Boosh3D();
+const game = new Boosh3D('#render');
+
 game.addScene('main', main);
 game.addScene('titlescreen', titlescreen);
-game.setScene('titlescreen');
+game.setScene('main');
 
 const music = require("./audio/spook.mp3").default;
 

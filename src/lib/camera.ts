@@ -29,4 +29,8 @@ export class Camera extends Movable {
     setFOV(fov:number) : number {
         return this.fov = (fov / 360) * (Math.PI * 2);
     }
+
+    getFOV() : number {
+        return Math.round((this.fov * 360) / (Math.PI * 2));
+    }
 }

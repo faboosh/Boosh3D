@@ -20,7 +20,7 @@ export class Object3D extends Movable {
             return {
                 r: 0.6 + (Math.random() * 0.4),
                 g: 0 + (Math.random() * 0),
-                b: 0.2 + (Math.random() * 0.1),
+                b: 0.8 + (Math.random() * 0.1),
             }
         })
     }

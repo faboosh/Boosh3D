@@ -1,19 +1,37 @@
-import { Vec } from '../lib/math';
-import { Object3D, loadModel } from '../boosh3D';
-import { getShaderProgram } from '../lib/canvas';
-import { Scene } from '../lib/scene';
+import { Object3D, loadModel, Scene, Util } from '../boosh3D';
 
-const main = new Scene();
+export default class Main extends Scene {
+    constructor() {
+        super()
+    }
 
-main.addObject('tank', new Object3D({
-    pos: new Vec(0, 0, 5),
-    rotation: new Vec(0, 0, 0),
-    mesh: loadModel('tank'),
-    shader: getShaderProgram()
-}));
+    sceneObjects() {
+        this.addObject('ship', new Object3D({
+            pos: new Util.Vec(5, 2, 10),
+            rotation: new Util.Vec(0, -2, 0),
+            mesh: loadModel('ship'),
+            shader: this.getShaderProgram('basic')
+        }));
 
-main.onUpdate = () => {
-    main.objects["tank"].rotateY(1);
-}
+        this.addObject('ship2', new Object3D({
+            pos: new Util.Vec(-5, 0, 10),
+            rotation: new Util.Vec(0, 0, 0),
+            mesh: loadModel('ship'),
+            shader: this.getShaderProgram('basic')
+        }));
+    }
 
-export default main;
+    onInit() {
+        this.objects['ship'].rotateX(180);
+        this.objects['ship2'].rotateX(180);
+    }
+
+    onUpdate = () => {
+        this.objects["ship"].rotateY(1);
+        this.objects["ship2"].rotateY(1);
+
+        if(this.key['q']) this.camera.setFOV(80)
+        if(this.key['e']) this.camera.setFOV(35)
+    }
+    
+};

@@ -1,9 +1,8 @@
 import { Vec } from '../lib/math';
 import { Object3D, loadModel } from '../boosh3D';
-import { getShaderProgram } from '../lib/canvas';
 import { Scene } from '../boosh3D';
 
-export default new class Titlescreen extends Scene {
+export default class Titlescreen extends Scene {
     constructor() {
         super();
     }
@@ -17,7 +16,7 @@ export default new class Titlescreen extends Scene {
             pos: new Vec(0, 0.5, 5),
             rotation: new Vec(0, 0, 0),
             mesh: loadModel('title'),
-            shader: getShaderProgram()
+            shader: this.getShaderProgram('basic')
         }));
     }
 

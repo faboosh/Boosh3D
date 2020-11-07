@@ -1,6 +1,5 @@
 import { Object3D } from "./object3D";
 import { Camera } from "./camera";
-import { gl, initCanvas } from './canvas';
 import { key } from './input';
 
 class AsyncAction {
@@ -29,19 +28,18 @@ export class Scene {
     objects: { [key: string]: Object3D; } = {};
     asyncActions: { [key: string]: AsyncAction; } = {};
     camera:Camera = new Camera(-1, 5, 80, 16 / 9);
-    gl:WebGL2RenderingContext = gl;
+    gl:WebGL2RenderingContext;
     key:any = key;
-    initCanvas:Function = initCanvas;
+    initCanvas:Function;
     onUpdate:Function = () => {};
-
 
     sceneObjects() {
 
     }
 
     init() {
-        this.onInit();
         this.sceneObjects();
+        this.onInit();
     }
 
     onInit() {
@@ -82,5 +80,39 @@ export class Scene {
 
     getObject(name:string) : Object3D {
         return this.objects[name];
+    }
+
+
+    getShaderProgram(name:string) {
+        this.gl.enable(this.gl.DEPTH_TEST);
+    
+        const vertexShader = this.gl.createShader(this.gl.VERTEX_SHADER);
+        const fragmentShader = this.gl.createShader(this.gl.FRAGMENT_SHADER);
+    
+        this.gl.shaderSource(vertexShader, require(`../shaders/${name}.vertex.glsl`).default);
+        this.gl.shaderSource(fragmentShader, require(`../shaders/${name}.fragment.glsl`).default);
+    
+        this.gl.compileShader(vertexShader);
+        if(!this.gl.getShaderParameter(vertexShader, this.gl.COMPILE_STATUS)) {
+            console.error('error compiling vertex shader', this.gl.getShaderInfoLog(vertexShader));
+            return;
+        }
+    
+        this.gl.compileShader(fragmentShader);
+        if(!this.gl.getShaderParameter(fragmentShader, this.gl.COMPILE_STATUS)) {
+            console.error('error compiling fragment shader', this.gl.getShaderInfoLog(fragmentShader));
+            return;
+        }
+    
+        const program = this.gl.createProgram();
+        this.gl.attachShader(program, vertexShader);
+        this.gl.attachShader(program, fragmentShader);
+        this.gl.linkProgram(program);
+        if(!this.gl.getProgramParameter(program, this.gl.LINK_STATUS)) {
+            console.error('ERROR linking program', this.gl.getProgramInfoLog(program));
+            return;
+        }
+    
+        return program;
     }
 }

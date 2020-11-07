@@ -1,0 +1,60 @@
+import { Vec } from "./math";
+
+export function drawPolygon(vertex:Vec[], gl:WebGL2RenderingContext, program:WebGLShader, c:any, matricies:any) {
+    const triangleVerticies = [
+    //  pX          pY            pZ           R    G    B                
+        vertex[0].x, vertex[0].y, vertex[0].z, c.r, c.g, c.b, 
+        vertex[1].x, vertex[1].y, vertex[1].z, c.r, c.g, c.b, 
+        vertex[2].x, vertex[2].y, vertex[2].z, c.r, c.g, c.b, 
+    ];
+
+    const triangleVertexBufferObject = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexBufferObject);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(triangleVerticies), gl.STATIC_DRAW);
+
+    const positionAttribLocation = gl.getAttribLocation(program, 'vertPosition');
+    const colorAttribLocation = gl.getAttribLocation(program, 'vertColor');
+    const mProjectionUniformLocation = gl.getUniformLocation(program, 'mProjection');
+    const rotationUniformLocation = gl.getUniformLocation(program, 'rotation');
+    const translationUniformLocation = gl.getUniformLocation(program, 'translation');
+
+    gl.uniformMatrix4fv(
+        mProjectionUniformLocation,
+        false,
+        new Float32Array(matricies.mProjection)
+    )
+
+    gl.uniform3fv(
+        rotationUniformLocation,
+        new Float32Array(matricies.rotation)
+    )
+
+    gl.uniform3fv(
+        translationUniformLocation,
+        new Float32Array(matricies.translation)
+    )
+
+    gl.vertexAttribPointer(
+        positionAttribLocation,
+        3,
+        gl.FLOAT,
+        false,
+        12 * Float32Array.BYTES_PER_ELEMENT,
+        0
+    );
+
+    gl.vertexAttribPointer(
+        colorAttribLocation,
+        3,
+        gl.FLOAT,
+        false,
+        12 * Float32Array.BYTES_PER_ELEMENT,
+        3 * Float32Array.BYTES_PER_ELEMENT
+    );
+    
+    gl.enableVertexAttribArray(positionAttribLocation);
+    gl.enableVertexAttribArray(colorAttribLocation);
+    gl.useProgram(program);
+
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+}
