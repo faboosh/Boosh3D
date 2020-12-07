@@ -1,11 +1,11 @@
-import { Object3D, Scene, Util } from '../boosh3D';
+import { Object3D, Scene, Util } from '../lib/boosh3D';
 
 export default class Test extends Scene {
     sceneObjects() {
-            this.addObject('tank', new Object3D({
-                pos: new Util.Vec(0, 0, 5),
+            this.addObject('sniper', new Object3D({
+                pos: new Util.Vec(0, 0, 8),
                 rotation: new Util.Vec(0, 0, 0),
-                mesh: this.models['tank'].get(),
+                mesh: this.models['sniper'].get(),
                 shader: this.shaders['basic'].get()
             }));
     }
@@ -16,7 +16,7 @@ export default class Test extends Scene {
     load() {
         return [
             this.loadShader('basic'),
-            this.loadModel('tank')
+            this.loadModel('sniper')
         ]
     }
 

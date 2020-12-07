@@ -1,5 +1,4 @@
-import { Vec, rotate3D, pointsToVec, vecToMatrix } from './math'
-import { drawPolygon } from './draw';
+import { Vec, rotate3D, pointsToVec } from './math'
 import { Camera } from './camera';
 import { Movable } from './movable';
 
@@ -17,41 +16,22 @@ export class Object3D extends Movable {
         this.mesh = mesh;
         this.shader = shader;
         this.colors = this.mesh.map(() => {
+            // return {
+            //     r: 0.3 + (Math.random() * 0.6),
+            //     g: 0 + (Math.random() * 0),
+            //     b: 0.3 + (Math.random() * 0.1),
+            // }
+            const rand = Math.random() * 0.3;
             return {
-                r: 0.6 + (Math.random() * 0.4),
-                g: 0 + (Math.random() * 0),
-                b: 0.8 + (Math.random() * 0.1),
+                r: 0.3 + (rand),
+                g: 0.3 + (rand),
+                b: 0.3 + (rand),
             }
         })
     }
 
-    loadAssets() {
-        
-    }
-
-    draw(gl:WebGL2RenderingContext, camera: Camera, program:WebGLShader) {
-
-        // for(let i = 0; i < this.mesh.length; i++) {
-        //     let polygon = this.mesh[i].map(vertex => {
-        //         return pointsToVec(vertex);
-        //     })
-
-        //     drawPolygon(polygon, gl, program, this.colors[i], {
-        //             mProjection: camera.getSerializedProjection(),
-        //             position: [
-        //                 this.pos.x,
-        //                 this.pos.y,
-        //                 this.pos.z,
-        //             ],
-        //             rotation: [
-        //                 this.rotation.x,
-        //                 this.rotation.y,
-        //                 this.rotation.z,
-        //             ],
-        //     });
-        // }
-
-        const transformed = this.mesh.map(polygon => {
+    getTransformedPolygons() {
+        return this.mesh.map(polygon => {
             return polygon.map(point => {
     
                 let vec = rotate3D(pointsToVec(point), this.rotation)
@@ -60,16 +40,64 @@ export class Object3D extends Movable {
                 vec.translate(this.pos)
     
                 return vec;
-                // return pointsToVec(point)
             })
         });
+    }
 
+    draw(gl:WebGL2RenderingContext, camera: Camera, program:WebGLShader) {
+        gl.useProgram(program);
+
+        const polygons = this.getTransformedPolygons();
+        const mProjection = camera.getSerializedProjection();
+
+        const positionAttribLocation = gl.getAttribLocation(program, 'vertPosition');
+        const colorAttribLocation = gl.getAttribLocation(program, 'vertColor');
+        const mProjectionUniformLocation = gl.getUniformLocation(program, 'mProjection');
+
+        gl.uniformMatrix4fv(
+            mProjectionUniformLocation,
+            false,
+            new Float32Array(mProjection)
+        )
         
 
-        transformed.forEach((polygon, i) => {
-            drawPolygon(polygon, gl, program, this.colors[i], {
-                mProjection: camera.getSerializedProjection()
-            });
-        })
+        for(let i = 0; i < polygons.length; i++) {
+            const c = this.colors[i];
+
+            const triangleVerticies = [
+            //  X                 Y                 Z                 R    G    B
+                polygons[i][0].x, polygons[i][0].y, polygons[i][0].z, c.r, c.g, c.b,
+                polygons[i][1].x, polygons[i][1].y, polygons[i][1].z, c.r, c.g, c.b,
+                polygons[i][2].x, polygons[i][2].y, polygons[i][2].z, c.r, c.g, c.b
+            ];
+
+            const triangleVertexBufferObject = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexBufferObject);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(triangleVerticies), gl.DYNAMIC_DRAW);
+
+            gl.vertexAttribPointer(
+                positionAttribLocation,
+                3,
+                gl.FLOAT,
+                false,
+                6 * Float32Array.BYTES_PER_ELEMENT,
+                0
+            );
+
+            gl.vertexAttribPointer(
+                colorAttribLocation,
+                3,
+                gl.FLOAT,
+                false,
+                6 * Float32Array.BYTES_PER_ELEMENT,
+                3 * Float32Array.BYTES_PER_ELEMENT
+            );
+
+            
+            gl.enableVertexAttribArray(positionAttribLocation);
+            gl.enableVertexAttribArray(colorAttribLocation);
+
+            gl.drawArrays(gl.TRIANGLES, 0, 3);
+        }
     }
 }

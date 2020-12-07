@@ -46,23 +46,30 @@ export class Scene {
             this.asyncActions['name'] = new AsyncAction(name, duration, action, stopCondition);
     }
 
-    run() {
-        this.initCanvas();
-        this.camera.setAspect(window.innerWidth / window.innerHeight);
-        this.onUpdate();
-
+    _doAsyncActions() {
         Object.keys(this.asyncActions).forEach((action:string) => {
             if(this.asyncActions[action]) 
                 this.asyncActions[action].do();
             if(this.asyncActions[action] && this.asyncActions[action].duration < 0) 
                 this.asyncActions[action] = undefined;
         })
+    }
+
+    run() {
+        this.initCanvas();
+        this.camera.setAspect(window.innerWidth / window.innerHeight);
+        this.onUpdate();
+
+        this._doAsyncActions()
+
         const { objects, gl, camera} 
             : {
                 objects : { [key: string]: Object3D; }, 
                 gl:WebGL2RenderingContext, 
                 camera:Camera
             } = this;
+        
+
         
         Object.keys(objects).forEach(function (key:string) {
             objects[key].draw(gl, camera, objects[key].shader)

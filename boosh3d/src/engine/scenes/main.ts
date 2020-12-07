@@ -1,4 +1,4 @@
-import { Object3D, Scene, Util } from '../boosh3D';
+import { Object3D, Scene, Util } from '../lib/boosh3D';
 
 export default class Main extends Scene {
     sceneObjects() {

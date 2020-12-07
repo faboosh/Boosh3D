@@ -1,7 +1,7 @@
-import { Scene } from "./lib/scene";
-import { Object3D } from "./lib/object3D";
-import { key, onKeyDown, onKeyUp } from "./lib/input";
-import * as Util from './lib/math';
+import { Scene } from "./scene";
+import { Object3D } from "./object3D";
+import { key, onKeyDown, onKeyUp } from "./input";
+import * as Util from './math';
 
 export default class Boosh3D {
     scenes: { [key: string]: Scene; } = {};

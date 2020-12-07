@@ -1,4 +1,4 @@
-import Boosh3D from './boosh3D';
+import Boosh3D from './lib/boosh3D';
 import main from './scenes/main';
 import test from './scenes/test';
 
