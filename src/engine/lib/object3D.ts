@@ -8,7 +8,7 @@ export class Object3D extends Movable {
     colors: any;
     shader: any;
 
-    constructor({pos, rotation, mesh, shader}: {pos: Vec, rotation: Vec, mesh:number[][][], shader:any}) {
+    constructor({ pos, rotation, mesh, shader }: { pos: Vec, rotation: Vec, mesh: number[][][], shader: any }) {
         super();
         this.pos = pos;
         this.rotation = rotation;
@@ -33,39 +33,54 @@ export class Object3D extends Movable {
     getTransformedPolygons() {
         return this.mesh.map(polygon => {
             return polygon.map(point => {
-    
+
                 let vec = rotate3D(pointsToVec(point), this.rotation)
+                //const vec = pointsToVec(point);
 
                 vec.scale(this.scale);
                 vec.translate(this.pos)
-    
+
                 return vec;
             })
         });
     }
 
-    draw(gl:WebGL2RenderingContext, camera: Camera, program:WebGLShader) {
+    draw(gl: WebGL2RenderingContext, camera: Camera, program: WebGLShader) {
         gl.useProgram(program);
 
         const polygons = this.getTransformedPolygons();
         const mProjection = camera.getSerializedProjection();
+        const viewRotation = camera.getSerializedRotation();
+        const viewTranslation = camera.getSerializedPosition();
 
         const positionAttribLocation = gl.getAttribLocation(program, 'vertPosition');
         const colorAttribLocation = gl.getAttribLocation(program, 'vertColor');
         const mProjectionUniformLocation = gl.getUniformLocation(program, 'mProjection');
+        const viewRotationUniformLocation = gl.getUniformLocation(program, 'viewRotation');
+        const viewTranslationUniformLocation = gl.getUniformLocation(program, 'viewTranslation');
 
         gl.uniformMatrix4fv(
             mProjectionUniformLocation,
             false,
             new Float32Array(mProjection)
         )
-        
 
-        for(let i = 0; i < polygons.length; i++) {
+        gl.uniform3fv(
+            viewRotationUniformLocation,
+            new Float32Array(viewRotation)
+        )
+
+        gl.uniform3fv(
+            viewTranslationUniformLocation,
+            new Float32Array(viewTranslation)
+        )
+
+
+        for (let i = 0; i < polygons.length; i++) {
             const c = this.colors[i];
 
             const triangleVerticies = [
-            //  X                 Y                 Z                 R    G    B
+                //  X                 Y                 Z                 R    G    B
                 polygons[i][0].x, polygons[i][0].y, polygons[i][0].z, c.r, c.g, c.b,
                 polygons[i][1].x, polygons[i][1].y, polygons[i][1].z, c.r, c.g, c.b,
                 polygons[i][2].x, polygons[i][2].y, polygons[i][2].z, c.r, c.g, c.b
@@ -93,7 +108,7 @@ export class Object3D extends Movable {
                 3 * Float32Array.BYTES_PER_ELEMENT
             );
 
-            
+
             gl.enableVertexAttribArray(positionAttribLocation);
             gl.enableVertexAttribArray(colorAttribLocation);
 

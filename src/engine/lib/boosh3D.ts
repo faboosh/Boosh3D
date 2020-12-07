@@ -5,15 +5,17 @@ import * as Util from './math';
 
 export default class Boosh3D {
     scenes: { [key: string]: Scene; } = {};
-    canvas:HTMLCanvasElement
-    gl:WebGL2RenderingContext;
+    canvas: HTMLCanvasElement
+    gl: WebGL2RenderingContext;
+    currentScene: Scene;
 
-    constructor(selector:string) {
+    mount(selector: string): void {
+        console.log(selector)
         this.canvas = <HTMLCanvasElement>document.querySelector(selector);
         this.gl = <WebGL2RenderingContext>this.canvas.getContext('webgl2');
     }
 
-    addScene(name:string, scene:any) {
+    addScene(name: string, scene: any) {
         const newScene = new scene();
         newScene.gl = this.gl;
         newScene.initCanvas = () => {
@@ -22,23 +24,25 @@ export default class Boosh3D {
         this.scenes[name] = newScene;
     }
 
-    async setScene(name:string) {
+    async setScene(name: string) {
         console.log(`set scene to ${name}`)
-        const scene = this.scenes[name];
-        await scene.init()
-        scene.run();
+        this.currentScene = this.scenes[name];
+        await this.currentScene.init()
+        this.currentScene.run();
     }
 }
 
-function initCanvas(canvas:HTMLCanvasElement, gl:WebGL2RenderingContext) {
-    const height:number = window.innerHeight;
-    const width:number = window.innerWidth;
+function initCanvas(canvas: HTMLCanvasElement, gl: WebGL2RenderingContext) {
+    const height: number = window.innerHeight;
+    const width: number = window.innerWidth;
     canvas.height = height;
     canvas.width = width;
 
     gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
     gl.clearColor(0.1, 0.1, 0.1, 1.0);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    gl.enable(gl.CULL_FACE);
+    gl.cullFace(gl.FRONT);
 
     const size = {
         width,
@@ -56,7 +60,7 @@ export {
     Object3D,
     key,
     Scene,
-    onKeyDown, 
+    onKeyDown,
     onKeyUp,
     Util
 }
