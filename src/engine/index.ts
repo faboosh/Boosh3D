@@ -3,9 +3,9 @@ import main from './scenes/main';
 import test from './scenes/test';
 
 export default function() :Boosh3D {
-    const game = new Boosh3D('#render');
+    const renderer = new Boosh3D('#render');
 
-    game.addScene('main', main);
-    game.addScene('test', test);
-    return game;
+    renderer.addScene('main', main);
+    renderer.addScene('test', test);
+    return renderer;
 };
