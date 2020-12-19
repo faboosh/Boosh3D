@@ -1,9 +1,10 @@
 import { loadTextResource } from './util'
 import { parseOBJ } from './objParser'
+import Mesh from './mesh';
 export class Model {
-    name:string;
-    private model:any = null;
-    constructor(name:string) {
+    name: string;
+    private model: Mesh;
+    constructor(name: string) {
         this.name = name;
     }
 
@@ -11,7 +12,7 @@ export class Model {
         return new Promise(async (resolve, reject) => {
             const model = await loadTextResource(`/models/${this.name}.obj`)
             this.model = parseOBJ(model)
-            resolve();
+            resolve(true);
         })
     }
 

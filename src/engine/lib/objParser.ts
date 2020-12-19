@@ -1,13 +1,17 @@
-export function parseOBJ(objText:string):number[][][] {
-    let verticies:number[][] = [];
-    let faces:any;
-    let vertexMatches = objText.match(/^v( -?\d+(\.\d+)?){3}$/gm);
-    let faceMatches = objText.match(/^f( (\/?\d+)+){3}/gm)
-    
+import Mesh from "./mesh";
 
-    if (vertexMatches && faceMatches)
-    {
-        verticies = 
+export function parseOBJ(objText: string): Mesh {
+    let verticies: number[][] = [];
+    let vertexMatches = objText.match(/^v( -?\d+(\.\d+)?){3}$/gm);
+    let faceMatches = objText.match(/^f( (\/?\d+)+){3}/gm);
+
+    let textures = [];
+    let normals = [];
+    let faces = [];
+
+
+    if (vertexMatches && faceMatches) {
+        verticies =
             vertexMatches.map(vertex => {
                 var vertices = vertex.split(" ");
                 vertices.shift();
@@ -15,24 +19,29 @@ export function parseOBJ(objText:string):number[][][] {
             });
 
 
-        faces =
-            faceMatches.map(face => {
-                let splitFaces = face.split(" ");
-                splitFaces.shift();
+        faceMatches.forEach(face => {
+            let splitFaces = face.split(" ");
+            splitFaces.shift();
 
-                return splitFaces.map(face => {
-                    let [v, vt, vn] = face.split("/").map(num => Number(num))
-                    return {v, vt, vn};
-                });
-            })
-        
+            console.log(splitFaces)
+
+            let vertex = [];
+            let texture = [];
+            let normal = [];
+
+            splitFaces.forEach(face => {
+                let [v, vt, vn] = face.split("/").map(num => Number(num))
+                vertex.push(v);
+                texture.push(vt);
+                normal.push(vn);
+            });
+
+            faces.push(vertex)
+            textures.push(texture)
+            normals.push(normal)
+        })
+
     }
 
-    faces = faces.map((face: any) => {
-        return face.map((vert:any) => {
-            return verticies[vert.v - 1]
-        })
-    })
-
-    return faces
+    return new Mesh(verticies, faces);
 }

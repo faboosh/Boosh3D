@@ -1,21 +1,22 @@
 import { Vec, rotate3D, pointsToVec } from './math'
 import { Camera } from './camera';
 import { Movable } from './movable';
+import Mesh from './mesh';
 
 export class Object3D extends Movable {
     scale: number;
-    mesh: number[][][];
+    mesh: Mesh;
     colors: any;
     shader: any;
 
-    constructor({ pos, rotation, mesh, shader }: { pos: Vec, rotation: Vec, mesh: number[][][], shader: any }) {
+    constructor({ pos, rotation, mesh, shader }: { pos: Vec, rotation: Vec, mesh: Mesh, shader: any }) {
         super();
         this.pos = pos;
         this.rotation = rotation;
         this.scale = 1;
         this.mesh = mesh;
         this.shader = shader;
-        this.colors = this.mesh.map(() => {
+        this.colors = this.mesh.indicies.map(() => {
             // return {
             //     r: 0.3 + (Math.random() * 0.6),
             //     g: 0 + (Math.random() * 0),
@@ -31,21 +32,19 @@ export class Object3D extends Movable {
     }
 
     getTransformedPolygons() {
-        return this.mesh.map(polygon => {
-            return polygon.map(point => {
+        return this.mesh.verticies.map(polygon => {
+            let vec = rotate3D(pointsToVec(polygon), this.rotation)
+            //const vec = pointsToVec(point);
 
-                let vec = rotate3D(pointsToVec(point), this.rotation)
-                //const vec = pointsToVec(point);
+            vec.scale(this.scale);
+            vec.translate(this.pos)
 
-                vec.scale(this.scale);
-                vec.translate(this.pos)
-
-                return vec;
-            })
+            return vec;
         });
     }
 
     draw(gl: WebGL2RenderingContext, camera: Camera, program: WebGLShader) {
+        console.log(this.mesh)
         gl.useProgram(program);
 
         const polygons = this.getTransformedPolygons();
@@ -76,43 +75,45 @@ export class Object3D extends Movable {
         )
 
 
-        for (let i = 0; i < polygons.length; i++) {
-            const c = this.colors[i];
-
-            const triangleVerticies = [
-                //  X                 Y                 Z                 R    G    B
-                polygons[i][0].x, polygons[i][0].y, polygons[i][0].z, c.r, c.g, c.b,
-                polygons[i][1].x, polygons[i][1].y, polygons[i][1].z, c.r, c.g, c.b,
-                polygons[i][2].x, polygons[i][2].y, polygons[i][2].z, c.r, c.g, c.b
-            ];
-
-            const triangleVertexBufferObject = gl.createBuffer();
-            gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexBufferObject);
-            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(triangleVerticies), gl.DYNAMIC_DRAW);
-
-            gl.vertexAttribPointer(
-                positionAttribLocation,
-                3,
-                gl.FLOAT,
-                false,
-                6 * Float32Array.BYTES_PER_ELEMENT,
-                0
-            );
-
-            gl.vertexAttribPointer(
-                colorAttribLocation,
-                3,
-                gl.FLOAT,
-                false,
-                6 * Float32Array.BYTES_PER_ELEMENT,
-                3 * Float32Array.BYTES_PER_ELEMENT
-            );
 
 
-            gl.enableVertexAttribArray(positionAttribLocation);
-            gl.enableVertexAttribArray(colorAttribLocation);
-
-            gl.drawArrays(gl.TRIANGLES, 0, 3);
-        }
+        /*         for (let i = 0; i < polygons.length; i++) {
+                    const c = this.colors[i];
+        
+                    const triangleVerticies = [
+                        //  X                 Y                 Z                 R    G    B
+                        polygons[i][0].x, polygons[i][0].y, polygons[i][0].z, c.r, c.g, c.b,
+                        polygons[i][1].x, polygons[i][1].y, polygons[i][1].z, c.r, c.g, c.b,
+                        polygons[i][2].x, polygons[i][2].y, polygons[i][2].z, c.r, c.g, c.b
+                    ];
+        
+                    const triangleVertexBufferObject = gl.createBuffer();
+                    gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexBufferObject);
+                    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(triangleVerticies), gl.DYNAMIC_DRAW);
+        
+                    gl.vertexAttribPointer(
+                        positionAttribLocation,
+                        3,
+                        gl.FLOAT,
+                        false,
+                        6 * Float32Array.BYTES_PER_ELEMENT,
+                        0
+                    );
+        
+                    gl.vertexAttribPointer(
+                        colorAttribLocation,
+                        3,
+                        gl.FLOAT,
+                        false,
+                        6 * Float32Array.BYTES_PER_ELEMENT,
+                        3 * Float32Array.BYTES_PER_ELEMENT
+                    );
+        
+        
+                    gl.enableVertexAttribArray(positionAttribLocation);
+                    gl.enableVertexAttribArray(colorAttribLocation);
+        
+                    gl.drawArrays(gl.TRIANGLES, 0, 3);
+                } */
     }
 }
